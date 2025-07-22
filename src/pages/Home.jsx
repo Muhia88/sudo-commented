@@ -23,15 +23,15 @@ const Home = () => {
             id: work.key.replace('/works/', ''),
             title: work.title,
             author: work.author_name?.[0] || 'Unknown Author',
-            cover: work.cover_id 
-              ? `https://covers.openlibrary.org/b/id/${work.cover_id}-M.jpg` 
+            cover: (work.cover_id || work.cover_i)
+              ? `https://covers.openlibrary.org/b/id/${work.cover_id || work.cover_i}-M.jpg`
               : '/book-placeholder.png',
             published: work.first_publish_year || 'N/A',
             rating: work.ratings_average || 0,
             ratingsCount: work.ratings_count || 0,
             subjects: work.subject?.slice(0, 3) || []
-          }))
-          setTrendingBooks(books)
+          }));
+          setTrendingBooks(books);
         }
       } catch (err) {
         setError('Failed to fetch trending books')

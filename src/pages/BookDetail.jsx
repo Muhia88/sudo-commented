@@ -267,7 +267,7 @@ const BookDetail = ({ user }) => {
             src={book.readUrl}
             title={`${book.title} Reader`}
             className="w-full h-full"
-            sandbox="allow-same-origin allow-scripts"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
           ></iframe>
         </div>
       </div>

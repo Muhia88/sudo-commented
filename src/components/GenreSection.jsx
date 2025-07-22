@@ -21,13 +21,13 @@ const GenreSection = ({ title, genre }) => {
             title: work.title,
             author: work.authors?.[0]?.name || 'Unknown Author',
             authorId: work.authors?.[0]?.key?.replace('/authors/', ''),
-            cover: work.cover_id 
-              ? `https://covers.openlibrary.org/b/id/${work.cover_id}-M.jpg` 
+            cover: (work.cover_id || work.cover_i)
+              ? `https://covers.openlibrary.org/b/id/${work.cover_id || work.cover_i}-M.jpg`
               : '/book-placeholder.png',
             published: work.first_publish_year || 'N/A',
             subjects: work.subject?.slice(0, 3) || []
-          }))
-          setBooks(booksData)
+          }));
+          setBooks(booksData);
         }
       } catch (error) {
         console.error(`Error fetching ${genre} books:`, error)

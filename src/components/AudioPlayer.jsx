@@ -1,8 +1,21 @@
 // src/components/AudioPlayer.jsx
+
 // Imports React and several hooks for state management, refs, and effects. `forwardRef` and `useImperativeHandle` are used to expose component functions to a parent.
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 // Imports icons for the play/pause button.
 import { FaPlay, FaPause } from 'react-icons/fa';
+
+// Helper function to format seconds into a MM:SS string.
+const formatTime = (timeInSeconds) => {
+  if (isNaN(timeInSeconds)) {
+    return '0:00';
+  }
+  const minutes = Math.floor(timeInSeconds / 60);
+  const seconds = Math.floor(timeInSeconds % 60);
+  // Pad the seconds with a leading zero if needed.
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+};
+
 
 // Defines the AudioPlayer component, wrapped in `forwardRef` to allow parent components to get a ref to it.
 const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
@@ -58,7 +71,7 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
       setProgress(newProgress);
     }
   };
-  
+
   // Exposes the `saveCurrentTime` function to the parent component via the ref.
   useImperativeHandle(ref, () => ({
     saveCurrentTime() {
@@ -70,22 +83,26 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
   // Returns the JSX for the audio player.
   return (
     <div className="bg-gray-100 rounded-lg p-4 mt-4">
-      {/* // The HTML <audio> element, which is not visible to the user but handles the actual playback. */}
+      {/* The HTML <audio> element, which is not visible to the user but handles the actual playback. */}
       <audio
         ref={audioRef}
         src={audioUrl}
         onTimeUpdate={handleTimeUpdate}
         onLoadedData={() => {
-          // ... (event handler for when audio data is loaded)
+          // When new audio is loaded, set its start time
+          if (audioRef.current) {
+            audioRef.current.currentTime = startTime || 0;
+            setProgress((startTime / audioRef.current.duration) * 100 || 0)
+          }
         }}
         onEnded={() => setIsPlaying(false)}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
       />
-      
-      {/* // The visible UI for the player. */}
+
+      {/* The visible UI for the player. */}
       <div className="flex items-center space-x-4">
-        // The play/pause button.
+        {/* The play/pause button. */}
         <button
           onClick={togglePlay}
           className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-3 transition-transform transform hover:scale-110"
@@ -93,8 +110,13 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
           {/* Conditionally renders the Pause or Play icon based on the isPlaying state. */}
           {isPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5" />}
         </button>
-        
-        {/* // The range input that serves as the progress/seek bar. */}
+
+        {/* Display Current Time */}
+        <span className="text-sm text-gray-600 w-12 text-center">
+          {formatTime(currentTime)}
+        </span>
+
+        {/* The range input that serves as the progress/seek bar. */}
         <input
           type="range"
           min="0"
@@ -104,10 +126,14 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
           onChange={handleProgressChange}
           className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
           // A style to make the track of the range input show the progress.
-          style={{ 
+          style={{
             background: `linear-gradient(to right, #8B5CF6 ${progress}%, #d1d5db ${progress}%)`
           }}
         />
+        {/* Display Total Duration */}
+        <span className="text-sm text-gray-600 w-12 text-center">
+          {audioRef.current ? formatTime(audioRef.current.duration) : '0:00'}
+        </span>
       </div>
     </div>
   );

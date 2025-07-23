@@ -1,30 +1,35 @@
 // src/components/ProgressBar.jsx
-// Imports the React library.
+
+// Import React library to create the component.
 import React from 'react';
-// Defines the ProgressBar functional component, which takes a 'progress' prop (a number from 0 to 100).
+
+/**
+ * ProgressBar component displays a visual progress bar.
+ * @param {object} props - The properties passed to the component.
+ * @param {number} props.progress - The progress percentage to display (0-100).
+ * @returns {JSX.Element} - A JSX element representing the progress bar.
+ */
 const ProgressBar = ({ progress }) => {
-  // Returns the JSX for the progress bar component.
   return (
-    // The main container for the progress bar.
     <div>
-       {/* //A flex container for the label and the percentage text. */}
+      {/* Container for the progress bar labels */}
       <div className="flex justify-between items-center mb-2">
-        {/* // The label for the progress bar. */}
+        {/* Label for the progress bar */}
         <span className="text-gray-700 font-medium">Reading Progress</span>
-        // The text displaying the current progress percentage.
+        {/* Display the progress percentage */}
         <span className="text-blue-600 font-bold">{progress}%</span>
       </div>
-      {/* // The background of the progress bar. */}
+      {/* The background of the progress bar */}
       <div className="w-full bg-gray-200 rounded-full h-4">
-        {/* // The filled portion of the progress bar. */}
+        {/* The foreground of the progress bar, representing the actual progress */}
         <div
           className="bg-blue-600 h-4 rounded-full"
-          // The width of this div is set dynamically based on the 'progress' prop, creating the fill effect.
-          style={{ width: `${progress}%` }}
+          style={{ width: `${progress}%` }} // The width is set dynamically based on the progress prop.
         ></div>
       </div>
     </div>
   );
 };
-// Exports the ProgressBar component as the default export.
+
+// Export the ProgressBar component for use in other parts of the application.
 export default ProgressBar;

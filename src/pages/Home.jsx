@@ -1,130 +1,77 @@
 // src/pages/Home.jsx
-import React, { useState, useEffect } from 'react'
-import BookCard from '../components/BookCard'
-import GenreSection from '../components/GenreSection'
 
+// Import necessary React hooks and components.
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Although Link is imported, it is not used in this component.
+import BookCard from '../components/BookCard'; // Component to display a single book.
+import BookCardSkeleton from '../components/BookCardSkeleton'; // Loading state placeholder.
+
+/**
+ * Home component serves as the main landing page for the "Read" section.
+ * It fetches and displays a list of popular books.
+ * @returns {JSX.Element} - A JSX element representing the home page.
+ */
 const Home = () => {
-  const [trendingBooks, setTrendingBooks] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  // State to store the fetched popular books.
+  const [popularBooks, setPopularBooks] = useState([]);
+  // State to manage the loading status.
+  const [loading, setLoading] = useState(true);
+  // State to store any potential errors during the fetch.
+  const [error, setError] = useState(null);
 
-  // Fetch trending books from OpenLibrary
+  // Effect to fetch popular books when the component mounts.
   useEffect(() => {
-    const fetchTrendingBooks = async () => {
+    const fetchPopularBooks = async () => {
       try {
-        setLoading(true)
-        const response = await fetch(
-          'https://openlibrary.org/trending/daily.json?limit=12'
-        )
-        const data = await response.json()
-        
-        if (data.works) {
-          const books = data.works.map(work => ({
-            id: work.key.replace('/works/', ''),
-            title: work.title,
-            author: work.author_name?.[0] || 'Unknown Author',
-            cover: (work.cover_id || work.cover_i)
-              ? `https://covers.openlibrary.org/b/id/${work.cover_id || work.cover_i}-M.jpg`
-              : '/book-placeholder.png',
-            published: work.first_publish_year || 'N/A',
-            rating: work.ratings_average || 0,
-            ratingsCount: work.ratings_count || 0,
-            subjects: work.subject?.slice(0, 3) || []
-          }));
-          setTrendingBooks(books);
-        }
+        setLoading(true);
+        // Fetch popular books from the Gutendex API.
+        const response = await fetch('https://gutendex.com/books/?sort=popular');
+        const data = await response.json();
+        // Set the fetched books to the state.
+        setPopularBooks(data.results);
       } catch (err) {
-        setError('Failed to fetch trending books')
-        console.error(err)
+        setError('Failed to fetch popular books');
+        console.error(err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    
-    fetchTrendingBooks()
-  }, [])
+    };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-red-500">{error}</p>
-      </div>
-    )
-  }
+    fetchPopularBooks();
+  }, []); // The empty dependency array ensures this effect runs only once on mount.
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16 mb-12 rounded-lg">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Discover Your Next Favorite Book</h1>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Explore millions of books, find recommendations, and build your personal reading list.
-          </p>
-          <div className="flex justify-center space-x-4">
-            <a 
-              href="#trending" 
-              className="bg-white text-blue-600 px-6 py-3 rounded-full font-medium hover:bg-blue-50 transition duration-200"
-            >
-              Browse Trending
-            </a>
-            <a 
-              href="/discover" 
-              className="border-2 border-white text-white px-6 py-3 rounded-full font-medium hover:bg-white hover:text-blue-600 transition duration-200"
-            >
-              Explore Genres
-            </a>
-          </div>
-        </div>
-      </section>
-      
-      {/* Trending Books */}
-      <section id="trending" className="mb-16">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Trending Books Today</h2>
-          <a 
-            href="/discover" 
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            View All →
-          </a>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {trendingBooks.map(book => (
-            <BookCard key={book.id} book={book} />
-          ))}
-        </div>
-      </section>
-      
-      {/* Popular Genres */}
-      <section className="mb-16">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">Popular Genres</h2>
-        <div className="space-y-12">
-          <GenreSection 
-            title="Science Fiction" 
-            genre="science_fiction"
-          />
-          <GenreSection 
-            title="Mystery & Thriller" 
-            genre="mystery"
-          />
-          <GenreSection 
-            title="Romance" 
-            genre="romance"
-          />
-        </div>
-      </section>
-    </div>
-  )
-}
+      {/* Page header */}
+      <div className="text-center my-8">
+        <h1 className="text-4xl font-bold mb-4">Discover Your Next Favorite Book</h1>
+        <p className="text-lg text-gray-600">
+          Explore thousands of free books.
+        </p>
+      </div>
 
-export default Home
+      {/* Section title for popular books */}
+      <h2 className="text-2xl font-bold mb-4">Popular Books</h2>
+
+      {/* Display an error message if the fetch fails. */}
+      {error && <div className="text-center text-red-500">{error}</div>}
+
+      {/* Grid to display the books. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {loading ? (
+          // Display skeleton loaders while fetching data.
+          Array.from({ length: 10 }).map((_, index) => (
+            <BookCardSkeleton key={index} />
+          ))
+        ) : (
+          // Map through the popular books and render a BookCard for each.
+          popularBooks.map(book => (
+            <BookCard key={book.id} book={book} />
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Home;

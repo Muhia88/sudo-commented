@@ -1,32 +1,32 @@
-// src/App.jsx
-
-// Import necessary React hooks and components from React and React Router.
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Outlet } from 'react-router-dom';
-
-// Import Firebase authentication and Firestore services.
 import { auth, db, googleProvider } from './firebase/firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
-// Import all the page components for the application.
+// Page Imports
+import LoginPage from './pages/LoginPage';
+import ChoosePath from './pages/ChoosePath';
+import ErrorPage from './pages/ErrorPage'; 
+
+// Read Page Imports
 import Home from './pages/Home';
 import SearchResults from './pages/SearchResults';
 import AuthorPage from './pages/AuthorPage';
 import BookDetail from './pages/BookDetail';
 import ReadingList from './pages/ReadingList';
 import Discover from './pages/Discover';
-import LoginPage from './pages/LoginPage';
-import ChoosePath from './pages/ChoosePath';
 
-// Import page components specific to the "Listen" section.
+
+// Listen Path Imports
 import ListenHomePage from './pages/listen/ListenHomePage';
 import DiscoverAudioBooks from './pages/listen/DiscoverAudioBooks';
 import MyListens from './pages/listen/MyListens';
 import AudioBookDetail from './pages/listen/AudioBookDetail';
 import AudioBookSearchResults from './pages/listen/AudioBookSearchResults';
 
-// Import Navbar components for different sections.
+
+// Component Imports
 import Navbar from './components/Navbar';
 import ListenNavbar from './components/listen/ListenNavbar';
 
@@ -74,6 +74,7 @@ const ListenLayout = ({ user, onSignOut }) => (
     </footer>
   </div>
 );
+
 
 /**
  * App is the root component of the application.
@@ -125,7 +126,7 @@ const MainApp = ({ user, setUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  /**
+   /**
    * Handles the Google sign-in process.
    * On successful sign-in, it creates a user document in Firestore if it doesn't exist.
    */
@@ -134,11 +135,11 @@ const MainApp = ({ user, setUser }) => {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // Check if the user document already exists in Firestore.
+      //Check if the user document already exists in Firestore
       const userRef = doc(db, 'users', user.uid);
       const docSnap = await getDoc(userRef);
 
-      // If the user is new, create a new document for them.
+      // If the user is new, create a new document for them
       if (!docSnap.exists()) {
         await setDoc(userRef, {
           uid: user.uid,
@@ -157,9 +158,7 @@ const MainApp = ({ user, setUser }) => {
     }
   };
 
-  /**
-   * Handles the sign-out process.
-   */
+  //Handles the sign-out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -170,35 +169,36 @@ const MainApp = ({ user, setUser }) => {
     }
   };
 
-  // Effect to handle routing based on authentication status.
+  //handles routing based on authentication status
   useEffect(() => {
     const publicRoutes = ['/login'];
     const isPublicRoute = publicRoutes.includes(location.pathname);
-
     // If the user is not logged in and not on a public route, redirect to the login page.
     if (!user && !isPublicRoute) {
       navigate('/login');
     } else if (user && isPublicRoute) {
-      // If the user is logged in and on a public route, redirect to the path selection page.
+       // If the user is logged in and on a public route, redirect to the path selection page.
       navigate('/choose-path');
     }
   }, [user, location.pathname, navigate]);
 
-  // If there is no user, only render the login route.
+  // If there is no user, only render the login route. Also include a catch-all for unknown paths.
   if (!user) {
     return (
       <Routes>
         <Route path="/login" element={<LoginPage onSignIn={handleGoogleSignIn} />} />
+        {/* For an unauthenticated user, any other path will also lead to the login page. */}
+        <Route path="*" element={<LoginPage onSignIn={handleGoogleSignIn} />} />
       </Routes>
     )
   }
 
-  // If a user is logged in, render all the application routes.
+  // If a user is logged in, render all the application routes
   return (
       <Routes>
         <Route path="/choose-path" element={<ChoosePath onSignOut={handleSignOut} />} />
 
-        {/* Routes for the "Read" section, using the ReadLayout. */}
+        {/* Read Path */}
         <Route element={<ReadLayout user={user} onSignOut={handleSignOut} />}>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<SearchResults />} />
@@ -209,7 +209,7 @@ const MainApp = ({ user, setUser }) => {
           <Route path="/discover/:genre" element={<Discover />} />
         </Route>
 
-        {/* Routes for the "Listen" section, using the ListenLayout. */}
+        {/* Listen Path */}
         <Route element={<ListenLayout user={user} onSignOut={handleSignOut} />}>
             <Route path="/listen" element={<ListenHomePage />} />
             <Route path="/listen/search" element={<AudioBookSearchResults />} />
@@ -218,6 +218,9 @@ const MainApp = ({ user, setUser }) => {
             <Route path="/my-listens" element={<MyListens user={user} />} />
             <Route path="/audiobook/:audioBookId" element={<AudioBookDetail user={user} />} />
         </Route>
+
+        {/* This is the catch-all route. */}
+        <Route path="*" element={<ErrorPage />} />
 
       </Routes>
   );

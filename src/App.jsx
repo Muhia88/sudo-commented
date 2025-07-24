@@ -89,11 +89,24 @@ const App = () => {
 
   // Effect to listen for changes in the authentication state.
   useEffect(() => {
+    /* auth.onAuthStateChanged((user) => { ... }): This sets up a listener. 
+    It's like telling Firebase, "Hey, from now on, please watch for any changes in the user's sign-in status."*/ 
+    /*When you call auth.onAuthStateChanged(), it doesn't just start listening; it also returns a function. 
+    This returned function is the key to stopping the listener.*/
+    /* const unsubscribe = auth.onAuthStateChanged(...): You are capturing this special "stop listening" function
+     and storing it in a constant called unsubscribe.*/
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       setLoading(false);
     });
     // Cleanup subscription on component unmount.
+    //When you return a function from within useEffect, React treats it as a cleanup function.
+    /*he onAuthStateChanged listener is an active, open connection to Firebase's services. 
+    If your App component were to be removed from the page without stopping this listener, 
+    the listener would still exist in memory, trying to update a component that is no longer there. 
+    This is a classic memory leak. By returning the unsubscribe function, you are telling React:
+     "When this component is finished and about to be removed, please run this unsubscribe function
+      to cleanly close the connection to Firebase."*/
     return unsubscribe;
   }, []);
 
@@ -136,7 +149,16 @@ const MainApp = ({ user, setUser }) => {
       const user = result.user;
 
       //Check if the user document already exists in Firestore
+      //This line creates a reference to a specific document in your database. 
+      // It's like creating a shortcut or a pointer to a very specific location.
+      // It does not read or write any data yet.
+      //doc(): This is a function from the Firebase SDK that builds the reference.
       const userRef = doc(db, 'users', user.uid);
+
+      //actually fetches the data. It takes the reference you created in the first line 
+      // and uses it to perform a network request to get the document from Firestore.
+      //getDoc(): This is the Firebase function that performs the read operation.
+      // It takes a document reference (userRef) as its argument
       const docSnap = await getDoc(userRef);
 
       // If the user is new, create a new document for them
@@ -170,8 +192,19 @@ const MainApp = ({ user, setUser }) => {
   };
 
   //handles routing based on authentication status
+  //This code runs after the component renders. It handles side effects, 
+  // like programmatically navigating the user.
   useEffect(() => {
     const publicRoutes = ['/login'];
+
+    /*const isPublicRoute = publicRoutes.includes(location.pathname);
+    ...is asking a simple yes-or-no question: "Is the page the user is currently on the login page?"
+    If the user is at your-website.com/login, then location.pathname is "/login". The code checks if 
+    ['/login'] includes "/login". The answer is true.
+    If the user is at your-website.com/my-list, then location.pathname is "/my-list". The code checks if 
+    ['/login'] includes "/my-list". The answer is false.
+    The result (true or false) is then stored in the isPublicRoute variable, which your app uses to decide
+    if it needs to redirect the user*/
     const isPublicRoute = publicRoutes.includes(location.pathname);
     // If the user is not logged in and not on a public route, redirect to the login page.
     if (!user && !isPublicRoute) {
@@ -183,6 +216,11 @@ const MainApp = ({ user, setUser }) => {
   }, [user, location.pathname, navigate]);
 
   // If there is no user, only render the login route. Also include a catch-all for unknown paths.
+  //This code runs during the component's render phase. Before any effects or navigation can happen, 
+  // React must decide what HTML to put on the screen right now.
+  //Its Job: To immediately check the user state. If the user is null, it only renders the login page routes. 
+  // The code for the main application (ReadLayout, ListenLayout, etc.) 
+  // is never even reached or considered for rendering.
   if (!user) {
     return (
       <Routes>
@@ -199,6 +237,12 @@ const MainApp = ({ user, setUser }) => {
         <Route path="/choose-path" element={<ChoosePath onSignOut={handleSignOut} />} />
 
         {/* Read Path */}
+        {/* <ReadLayout> is used as the parent route.
+         Any child route nested inside it will be rendered
+        where the <Outlet /> component is placed within ReadLayout. */}
+        {/* In short, you are telling React Router: "for any of these nested paths,
+         first render the layout (ReadLayout or ListenLayout), and then render the 
+         specific page component (Home, SearchResults, etc.) inside that layout's <Outlet />." */}
         <Route element={<ReadLayout user={user} onSignOut={handleSignOut} />}>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<SearchResults />} />
@@ -210,6 +254,7 @@ const MainApp = ({ user, setUser }) => {
         </Route>
 
         {/* Listen Path */}
+        {/* <ListenLayout> is used here to wrap all the routes related to the "Listen" section of your application. */}
         <Route element={<ListenLayout user={user} onSignOut={handleSignOut} />}>
             <Route path="/listen" element={<ListenHomePage />} />
             <Route path="/listen/search" element={<AudioBookSearchResults />} />

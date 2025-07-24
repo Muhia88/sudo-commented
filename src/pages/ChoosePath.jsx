@@ -17,6 +17,10 @@ const ChoosePath = ({ onSignOut }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       {/* Sign-out button positioned at the top-left of the page. */}
+      {/* The div with the absolute class has no parent with a relative class.
+       Therefore, it positions itself relative to the viewport(the visible part of the web page). 
+       The classes top-4 (top: 1rem) and left-4 (left: 1rem) place the button
+        in the top-left corner of the screen, which is the intended design. */}
       <div className="absolute top-4 left-4">
         <button
           onClick={onSignOut}

@@ -57,9 +57,25 @@ const Home = () => {
       {error && <div className="text-center text-red-500">{error}</div>}
 
       {/* Grid to display the books. */}
+      {/* follows a mobile-first design philosophy. 
+      This means the styles without a prefix (like grid-cols-1) are the default styles
+      for the smallest screen sizes, and you then add classes to override them as the screen gets larger. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {loading ? (
+          
           // Display skeleton loaders while fetching data.
+          //This part of the code is a concise way to create a new array with 10 empty slots.
+          //You can't directly map over a number. For example, 10.map(...) doesn't work. 
+          // You need an actual array to use the .map() function.
+          // The object { length: 10 } is an "array-like" object.
+          //  It doesn't have any items, but it does have a length property. 
+          // Array.from() sees this and creates a real array with 10 undefined elements: 
+          // [undefined, undefined, ..., undefined].
+          //The Underscore (_): The underscore is a widely used convention among developers to signal: 
+          // "I know this parameter exists, but I am not going to use it in my code."
+          // Since our array is [undefined, undefined, ...], the value is always undefined, and we don't need it. 
+          // We only care about how many times we loop.
+          //Using _ makes the code cleaner and clearer to other developers
           Array.from({ length: 10 }).map((_, index) => (
             <BookCardSkeleton key={index} />
           ))

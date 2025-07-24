@@ -3,6 +3,11 @@
 import React from 'react';
 
 // Defines the BookCardSkeleton functional component.
+//The BookCardSkeleton is a placeholder component. 
+// Its job is to visually mimic the layout of the real BookCard while the actual data is loading. 
+// This is a crucial part of creating a good User Experience (UX).
+// The animate-pulse class is a Tailwind CSS utility that creates a gentle pulsing effect. 
+// This visual cue tells the user, "Content is being loaded here, please wait."
 const BookCardSkeleton = () => {
   // Returns the JSX for the skeleton loader, which mimics the structure of the BookCard.
   return (

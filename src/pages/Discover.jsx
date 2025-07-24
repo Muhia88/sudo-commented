@@ -1,48 +1,41 @@
-// src/pages/Discover.jsx
-
-// Import necessary React hooks and components.
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom'; // To get URL parameters and create links.
-import BookCard from '../components/BookCard'; // Component to display a single book.
-import BookCardSkeleton from '../components/BookCardSkeleton'; // Loading state placeholder.
+import { useParams, Link } from 'react-router-dom';
+import BookCard from '../components/BookCard';
+import BookCardSkeleton from '../components/BookCardSkeleton';
 
 // A predefined list of popular genres/tags with emojis.
 const popularTags = [
-  { name: 'Science Fiction', emoji: '🚀' },
   { name: 'Fantasy', emoji: '🧙' },
   { name: 'Detective', emoji: '🕵️' },
-  { name: 'Gothic Fiction', emoji: '🏰' },
-  { name: 'Sea Stories', emoji: '⛵' },
   { name: 'Mythology', emoji: '✨' },
   { name: 'Poetry', emoji: '✒️' },
   { name: 'Philosophy', emoji: '🤔' },
-  { name: "Children's Literature", emoji: '🧸' },
   { name: 'Adventure', emoji: '🗺️' },
 ];
 
-/**
- * Discover component allows users to discover books by Browse popular genres.
- * It fetches and displays books for a selected genre.
- * @returns {JSX.Element} - A JSX element representing the discover page.
- */
+
+//allows users to discover books by Browse popular genres. 
 const Discover = () => {
-  // Get the genre from the URL parameters.
+  
   const { genre } = useParams();
-  // State to store the fetched books.
   const [books, setBooks] = useState([]);
-  // State to manage the loading status.
-  const [loading, setLoading] = useState(true);
-  // State to store any potential errors during the fetch.
+  const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null);
 
   // Effect to fetch books when the genre parameter changes.
   useEffect(() => {
     const fetchBooks = async () => {
+      // If no genre is selected from the URL, do not fetch anything.
+      if (!genre) {
+        setBooks([]); 
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        // If a genre is selected, use it as the topic; otherwise, default to 'popular'.
-        const topic = genre || 'popular';
-        // Construct the Gutendex API URL.
+        
+        const topic = genre;
         const url = `https://gutendex.com/books?topic=${topic.toLowerCase().replace(/\s+/g, '_')}`;
 
         const response = await fetch(url);
@@ -104,7 +97,7 @@ const Discover = () => {
       {/* Grid to display the books. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {loading ? (
-          // Display skeleton loaders while fetching data.
+          // Display skeleton loaders ONLY when fetching data for a selected genre.
           Array.from({ length: 8 }).map((_, index) => (
             <BookCardSkeleton key={index} />
           ))
@@ -115,6 +108,13 @@ const Discover = () => {
           ))
         )}
       </div>
+
+      {/* Show a prompt to the user if no genre is selected and nothing is loading */}
+      {!loading && !genre && (
+        <div className="col-span-full text-center text-gray-600 mt-8">
+            <p>Please select a genre to start discovering books.</p>
+        </div>
+      )}
     </div>
   );
 };

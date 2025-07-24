@@ -21,7 +21,7 @@ const AudioBookDetail = ({ user }) => {
   // State for the audiobook data.
   const [audiobook, setAudiobook] = useState(null);
   // State for the book cover URL.
-  const [coverUrl, setCoverUrl] = useState('/book-placeholder.png');
+  const [coverUrl, setCoverUrl] = useState('/image-placeholder.jpg');
   // State for loading status.
   const [loading, setLoading] = useState(true);
   // State for error messages.

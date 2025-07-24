@@ -33,16 +33,16 @@ const AudioBookCard = ({ audiobook }) => {
             setCoverUrl(`https://covers.openlibrary.org/b/id/${data.docs[0].cover_i}-M.jpg`);
           } else {
             // Sets a fallback placeholder image if no cover is found.
-            setCoverUrl('/book-placeholder.png');
+            setCoverUrl('/image-placeholder.jpg');
           }
         } catch (error) {
           // Logs any errors and sets the fallback image.
           console.error("Failed to fetch book cover", error);
-          setCoverUrl('/book-placeholder.png');
+          setCoverUrl('/image-placeholder.jpg');
         }
       } else {
          // Sets the fallback image if there's no title to search for.
-         setCoverUrl('/book-placeholder.png');
+         setCoverUrl('/image-placeholder.jpg');
       }
       // Sets loading to false once the fetch is complete.
       setLoading(false);

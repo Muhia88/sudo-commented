@@ -1,27 +1,18 @@
-// src/pages/listen/DiscoverAudioBooks.jsx
-
-// Import necessary React hooks and components.
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom'; // To get URL parameters and create links.
-import AudioBookCard from '../../components/AudioBookCard'; // Component to display a single audiobook.
-import AudioBookCardSkeleton from '../../components/AudioBookCardSkeleton'; // Loading state placeholder.
+import { useParams, Link } from 'react-router-dom';
+import AudioBookCard from '../../components/AudioBookCard';
+import AudioBookCardSkeleton from '../../components/AudioBookCardSkeleton';
 
 // A predefined list of popular genres to display as quick links.
-const popularTags = ['Poetry', 'Fiction', "Children's Fiction", 'Historical Fiction', 'General Fiction', 'Science fiction', 'Action & Adventure Fiction'];
+const popularTags = ['Poetry', "Children's Fiction", 'Historical Fiction', 'General Fiction', 'Science fiction'];
 
-/**
- * DiscoverAudioBooks component allows users to discover audiobooks by Browse popular genres.
- * It fetches and displays audiobooks for a selected genre.
- * @returns {JSX.Element} - A JSX element representing the discover audiobooks page.
- */
+
+//allows users to discover audiobooks by Browse popular genres.
 const DiscoverAudioBooks = () => {
-  // Get the genre from the URL parameters.
+
   const { genre } = useParams();
-  // State to store the fetched audiobooks.
   const [audiobooks, setAudiobooks] = useState([]);
-  // State to manage the loading status.
-  const [loading, setLoading] = useState(true);
-  // State to store any potential errors during the fetch.
+  const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null);
 
   // Effect to fetch audiobooks when the genre parameter changes.
@@ -29,8 +20,8 @@ const DiscoverAudioBooks = () => {
     const fetchBooks = async () => {
       // If no genre is selected, do nothing.
       if (!genre) {
-        setLoading(false);
         setAudiobooks([]);
+        setLoading(false);
         return;
       }
       try {
@@ -57,7 +48,7 @@ const DiscoverAudioBooks = () => {
     };
 
     fetchBooks();
-  }, [genre]); // Rerun the effect whenever the genre changes.
+  }, [genre]);
 
   return (
     <div>
@@ -111,6 +102,13 @@ const DiscoverAudioBooks = () => {
           ))
         )}
       </div>
+
+      {/* Show a prompt to the user if no genre is selected and nothing is loading */}
+      {!loading && !genre && (
+        <div className="col-span-full text-center text-gray-600 mt-8">
+            <p>Please select a genre to start discovering books.</p>
+        </div>
+      )}
     </div>
   );
 };

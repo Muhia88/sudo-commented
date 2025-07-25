@@ -17,7 +17,11 @@ const formatTime = (timeInSeconds) => {
 };
 
 
+
 // Defines the AudioPlayer component, wrapped in `forwardRef` to allow parent components to get a ref to it.
+/*forwardRef: This is a special React function that lets a parent component (like AudioBookDetail)
+ get a ref to a child component. It's necessary here so the parent can call the saveCurrentTime function.
+  The ref is passed as a second argument to the component function. */
 const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
   // State to track whether the audio is currently playing.
   const [isPlaying, setIsPlaying] = useState(false);
@@ -29,6 +33,10 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
   const audioRef = useRef(null);
 
   // An effect that runs when the audio source (audioUrl) or the initial start time changes.
+  /*This hook runs whenever the audioUrl (the chapter) or the startTime changes. Its job is to 
+  reset the player for the new track. It pauses playback (setIsPlaying(false)), 
+  resets the progress bar visually (setProgress(0)), and sets the audio element's time 
+  to the startTime provided (which will be 0 for a new chapter or a saved time if resuming). */
   useEffect(() => {
     // If the audio element exists...
     if (audioRef.current) {
@@ -40,6 +48,9 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
   }, [audioUrl, startTime]);
 
   // Function to toggle between play and pause.
+  /*Checks the isPlaying state. If true, it calls audioRef.current.pause().
+   If false, it calls audioRef.current.play().It then flips the isPlaying state by 
+   calling setIsPlaying(!isPlaying). */
   const togglePlay = () => {
     if (isPlaying) {
       audioRef.current.pause();
@@ -51,6 +62,11 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
   };
 
   // Function that is called continuously as the audio plays to update the progress.
+  /*This function is connected to the <audio> element's onTimeUpdate event, which fires repeatedly as the audio plays.
+
+  It calculates the progress percentage ((currentTime / duration) * 100) 
+  and updates both the progress and currentTime states,
+  causing the slider and time display to update in real-time. */
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
     if (audio.duration) {
@@ -62,6 +78,10 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
   };
 
   // Function to handle the user manually seeking through the audio with the range input.
+  /*This function is called when the user drags the slider.
+  It takes the new value from the slider (0-100) and does the reverse calculation to 
+  figure out the corresponding time in seconds.
+  It then sets audioRef.current.currentTime to that new time, making the audio jump to that position. */
   const handleProgressChange = (e) => {
     const newProgress = e.target.value;
     if (audioRef.current.duration) {
@@ -73,6 +93,14 @@ const AudioPlayer = forwardRef(({ audioUrl, startTime, onSave }, ref) => {
   };
 
   // Exposes the `saveCurrentTime` function to the parent component via the ref.
+  /*This hook is used with forwardRef. It customizes the instance value that is exposed to parent components when they use the ref.
+
+Here, it exposes an object with a single method: saveCurrentTime.
+
+When the parent component calls playerRef.current.saveCurrentTime(), 
+this function is executed. It gets the current playback time from the <audio> element 
+(audioRef.current.currentTime) and passes it up to the parent by calling the onSave function
+ that was passed in as a prop. */
   useImperativeHandle(ref, () => ({
     saveCurrentTime() {
       // Calls the onSave function passed down from the parent with the current time.
